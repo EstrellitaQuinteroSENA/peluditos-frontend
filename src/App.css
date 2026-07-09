@@ -209,6 +209,32 @@ body {
     }
 }
 
+/* --- AJUSTES RESPONSIVOS PARA EL HEADER (MÓVIL) --- */
+@media (max-width: 600px) {
+    .header {
+        flex-direction: column;  
+        padding: 15px 10px;      
+        gap: 15px;             
+    }
+
+    .nav {
+        display: flex;
+        flex-wrap: wrap;         
+        justify-content: center; 
+        gap: 10px;               
+    }
+
+    .nav a {
+        margin-right: 0px;      
+        font-size: 14px;
+    }
+
+    .header-right {
+        justify-content: center; 
+        width: 100%;
+    }
+}
+
 
 /* ----- CATÁLOGO ----- */
 
@@ -1553,4 +1579,31 @@ body {
     height: auto;        
     margin: 0 auto 10px auto; 
     object-fit: contain;
+}
+
+/* --- AJUSTES PARA EL PANEL DE ADMINISTRACIÓN (MÓVIL) --- */
+@media (max-width: 768px) {
+    .contenedor-tabla, table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;       
+        white-space: nowrap;    
+    }
+
+    /* Ajuste para la barra de filtros superiores */
+    .filtros-admin-contenedor { 
+        display: flex;
+        flex-direction: column; 
+        width: 100%;
+        gap: 10px;
+    }
+}
+
+/* --- AJUSTES PARA LA PREVISUALIZACIÓN DE DISEÑO (MÓVIL) --- */
+@media (max-width: 600px) {
+    .contenedor-diseno-tarjeta {
+        width: 90% !important;   
+        max-width: 420px;
+        margin: 0 auto !important; 
+    }
 }
