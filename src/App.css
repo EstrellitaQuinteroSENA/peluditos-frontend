@@ -639,6 +639,45 @@ body {
     }
 }
 
+@media (max-width: 500px) {
+    .design-page {
+        padding: 20px 10px; /* Reduce los 60px para que quepa en el celular */
+    }
+
+    .page-title {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .design-container {
+        width: 100%;
+        gap: 20px;
+        padding: 0 5px;
+        box-sizing: border-box;
+    }
+
+    .options-panel, .preview-panel {
+        padding: 20px 15px; 
+        border-radius: 15px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .slider {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .slider-track {
+        width: 180px; 
+        overflow-x: auto; 
+    }
+
+    .preview-box {
+        height: 250px; 
+    }
+}
+
 /* MODAL LOGIN */
 
 .login-modal {
@@ -1213,6 +1252,7 @@ body {
     max-width: 1300px;
     margin: 0 auto;
     min-height: 80vh;
+    box-sizing: border-box;
 }
 
 /* Barra de Controles (Filtros y Botón Agregar) */
@@ -1234,12 +1274,14 @@ body {
     gap: 20px;
     align-items: flex-end;
     flex-grow: 1;
+    flex-wrap: wrap; /* Permite que los filtros bajen si no caben */
 }
 
 .filter-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    flex-grow: 1; /* Ayuda a que se adapten en pantallas medianas */
 }
 
 .filter-group label {
@@ -1254,9 +1296,13 @@ body {
     border-radius: 8px;
     font-size: 14px;
     outline: none;
+    width: 100%; /* Por defecto usan el contenedor */
+    box-sizing: border-box;
 }
 
-.filter-input-search { width: 250px; }
+.filter-input-search { 
+    width: 250px; 
+}
 
 .btn-limpiar {
     background: none;
@@ -1284,12 +1330,14 @@ body {
     box-shadow: 0 5px 15px rgba(212, 167, 44, 0.4);
 }
 
-/* Tabla de Inventario */
+/* Tabla de Inventario con Scroll Seguro */
 .inventory-table-container {
     background-color: var(--blanco);
     border-radius: 15px;
-    overflow: hidden;
+    overflow-x: auto; /* ¡Clave! Genera el scroll con el dedo en celular */
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
 }
 
 .admin-table {
@@ -1303,6 +1351,7 @@ body {
     color: var(--blanco);
     padding: 15px;
     font-size: 14px;
+    white-space: nowrap; /* Evita que los títulos se rompan feo */
 }
 
 .admin-table td {
@@ -1352,6 +1401,7 @@ body {
     overflow-y: auto;
     max-height: 90vh;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-sizing: border-box;
 }
 
 /* Control del Logo en el Modal */
@@ -1456,6 +1506,7 @@ body {
     background-color: var(--gris-piedra);
     font-size: 14px;
     outline: none;
+    box-sizing: border-box;
 }
 
 .input-id-readonly {
@@ -1495,7 +1546,7 @@ body {
     flex-direction: column;
     align-items: center;
     font-size: 11px;
-    color: var(--verde-bosque); /* Letras XS, S... en verde */
+    color: var(--verde-bosque);
     font-weight: 600;
 }
 
@@ -1543,16 +1594,67 @@ body {
 .decor-left { bottom: 20px; left: 20px; transform: rotate(15deg); }
 .decor-right { top: 20px; right: 20px; transform: rotate(-15deg); }
 
-/* Responsivo */
+
+/* =======================================================
+   NUEVA REGRA RESPONSIVA MEDIA QUERY PARA EL ADMINISTRADOR
+   ======================================================= */
 @media (max-width: 768px) {
-    .modal-form-two-columns {
-        grid-template-columns: 1fr;
+    .admin-container {
+        padding: 20px 15px; /* Reduce márgenes laterales para ganar espacio */
     }
+
+    /* Hace que los controles se apilen uno debajo del otro */
+    .admin-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    /* La barra de filtros pasa a ser una columna vertical ordenada */
+    .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .filter-input-search {
+        width: 100%; /* Rompe los 250px rígidos en pantallas pequeñas */
+    }
+
+    .btn-limpiar {
+        text-align: center;
+        padding-bottom: 0;
+    }
+
+    .btn-add-bandana {
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Forzar tabla con un ancho mínimo para que sea deslizable e legible */
+    .admin-table {
+        min-width: 650px;
+    }
+
+    /* Modales adaptados a pantallas de celulares */
+    .modal-form-two-columns {
+        grid-template-columns: 1fr; /* Pasa de 2 columnas a 1 sola */
+        gap: 20px;
+    }
+    
     .modal-full-width {
         grid-column: span 1;
     }
+    
     .modal-bandana {
-        padding: 40px 20px;
+        padding: 30px 15px;
+    }
+
+    /* El stock se reestructura para que no se aplasten los números */
+    .stock-inputs-row {
+        grid-template-columns: repeat(3, 1fr); /* 3 columnas arriba y 2 abajo */
+        gap: 10px;
     }
 }
 
@@ -1581,29 +1683,5 @@ body {
     object-fit: contain;
 }
 
-/* --- AJUSTES PARA EL PANEL DE ADMINISTRACIÓN (MÓVIL) --- */
-@media (max-width: 768px) {
-    .contenedor-tabla, table {
-        display: block;
-        width: 100%;
-        overflow-x: auto;       
-        white-space: nowrap;    
-    }
 
-    /* Ajuste para la barra de filtros superiores */
-    .filtros-admin-contenedor { 
-        display: flex;
-        flex-direction: column; 
-        width: 100%;
-        gap: 10px;
-    }
-}
 
-/* --- AJUSTES PARA LA PREVISUALIZACIÓN DE DISEÑO (MÓVIL) --- */
-@media (max-width: 600px) {
-    .contenedor-diseno-tarjeta {
-        width: 90% !important;   
-        max-width: 420px;
-        margin: 0 auto !important; 
-    }
-}
