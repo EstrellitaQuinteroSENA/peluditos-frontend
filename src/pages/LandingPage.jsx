@@ -16,10 +16,10 @@ function LandingPage() {
             Collares, bandanas y accesorios personalizados para tu mascota.
           </h1>
           <p>
-            Tú eliges los colores, nosotros creamos la magia para tu peludito.
+            "Diseños exclusivos hechos a mano con amor para consentir a tu peludito."
           </p>
           <a href="#" className="btn btn-hero">
-            Diseñar mi propio accesorio
+            Ver Últimos Diseños
           </a>
         </div>
 

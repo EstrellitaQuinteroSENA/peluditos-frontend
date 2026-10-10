@@ -1,66 +1,66 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Navbar({ tipo }) {
   const navigate = useNavigate();
 
-  // ==========================================
-  // ESTADOS PARA PASARELAS Y VENTANAS EMERGENTES
-  // ==========================================
+  // Estado para verificar si hay sesión activa en tiempo real
+  const [isLogged, setIsLogged] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+
+  // ESTADOS PARA MODALES
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [showError, setShowError] = useState(false);
 
-  // Estados para capturar las cajas de texto
+  // Campos de formulario
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // ==========================================
-  // LOGICA DE CONTROL DE FLUJO (AUTENTICACIÓN RIGIDA)
-  // ==========================================
+  // Verificar sesión al cargar el componente
+  useEffect(() => {
+    const logged = localStorage.getItem("isLogged") === "true";
+    const role = localStorage.getItem("userRole");
+    setIsLogged(logged);
+    setUserRole(role);
+  }, []);
+
   const handleLoginSubmit = (e) => {
     e.preventDefault();
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
-
-    if (!emailRegex.test(cleanEmail)) {
-      setErrorMessage("Por favor ingresa un correo válido.");
-      setShowError(true);
-      return;
-    }
-
-    if (cleanPassword.length < 6) {
-      setErrorMessage("La contraseña debe tener al menos 6 caracteres.");
-      setShowError(true);
-      return;
-    }
 
     if (cleanEmail === "cliente@peluditos.com" && cleanPassword === "123456") {
       localStorage.setItem("isLogged", "true");
       localStorage.setItem("userRole", "client");
+      setIsLogged(true);
+      setUserRole("client");
       setShowLogin(false);
       resetForm();
-      navigate("/designer");
+      navigate("/mis-pedidos");
     } else if (
       cleanEmail === "admin@peluditos.com" &&
       cleanPassword === "admin123"
     ) {
       localStorage.setItem("isLogged", "true");
       localStorage.setItem("userRole", "admin");
+      setIsLogged(true);
+      setUserRole("admin");
       setShowLogin(false);
       resetForm();
       navigate("/admin");
     } else {
-      setErrorMessage("Credenciales de prueba incorrectas. Revisa la guía.");
+      setErrorMessage("Credenciales incorrectas. Revisa los datos de prueba.");
       setShowError(true);
     }
   };
 
   const handleLogout = () => {
     localStorage.clear();
+    setIsLogged(false);
+    setUserRole(null);
     navigate("/");
   };
 
@@ -79,50 +79,17 @@ function Navbar({ tipo }) {
     setShowRegister(true);
   };
 
-  // ==========================================
-  // RENDERIZADO DINÁMICO DE ENLACES Y BOTONES
-  // ==========================================
+  // RENDER DE ENLACES
   const renderEnlaces = () => {
-    if (tipo === "admin") {
+    if (tipo === "admin" || userRole === "admin") {
       return (
         <nav className="nav">
-          <a href="#" onClick={(e) => e.preventDefault()}>
-            Inventario
-          </a>
-          <a href="#" onClick={(e) => e.preventDefault()}>
-            Pedidos
-          </a>
+          <a href="/admin">Inventario</a>
+          <a href="/admin">Pedidos General</a>
         </nav>
       );
     }
 
-    if (tipo === "diseno") {
-      return (
-        <nav className="nav">
-          <a
-            href="/"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate("/");
-            }}
-          >
-            Inicio
-          </a>
-          <a href="/#catalogo">Catálogo</a>
-          <a
-            href="#"
-            className="nav-orders"
-            onClick={(e) => e.preventDefault()}
-          >
-            Mis pedidos
-          </a>
-          <a href="#">Nosotros</a>
-          <a href="#contacto">Contacto</a>
-        </nav>
-      );
-    }
-
-    // Menú Comercial por defecto (LandingPage)
     return (
       <nav className="nav">
         <a
@@ -135,33 +102,29 @@ function Navbar({ tipo }) {
           Inicio
         </a>
         <a href="#catalogo">Catálogo</a>
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            openLoginModal();
-          }}
-        >
-          Diseña tu accesorio
-        </a>
-        <a href="#">Nosotros</a>
+
+        {/* Solo se muestra Mis Pedidos si hay sesión activa */}
+        {isLogged && (
+          <a
+            href="/mis-pedidos"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/mis-pedidos");
+            }}
+          >
+            Mis pedidos
+          </a>
+        )}
+
+        <a href="#nosotros">Nosotros</a>
         <a href="#contacto">Contacto</a>
       </nav>
     );
   };
 
+  // RENDER DE BOTONES
   const renderBotones = () => {
-    if (tipo === "admin") {
-      return (
-        <div className="auth-buttons">
-          <button onClick={handleLogout} className="btn btn-header-yellow">
-            Cerrar sesión
-          </button>
-        </div>
-      );
-    }
-
-    if (tipo === "diseno") {
+    if (isLogged) {
       return (
         <div className="auth-buttons">
           <span className="user-info">Sesión activa 🐾</span>
@@ -172,7 +135,6 @@ function Navbar({ tipo }) {
       );
     }
 
-    // Botones comerciales por defecto
     return (
       <div className="auth-buttons">
         <button onClick={openLoginModal} className="btn btn-header-outline">
@@ -209,11 +171,7 @@ function Navbar({ tipo }) {
 
       {/* MODAL DE INICIAR SESIÓN */}
       {showLogin && (
-        <div
-          id="loginModal"
-          className="login-modal"
-          style={{ display: "flex" }}
-        >
+        <div className="login-modal" style={{ display: "flex" }}>
           <div className="login-box">
             <span className="close-modal" onClick={() => setShowLogin(false)}>
               ✕
@@ -225,7 +183,8 @@ function Navbar({ tipo }) {
             />
             <h2>Iniciar sesión</h2>
             <p className="modal-subtitle">
-              Accede a tu cuenta para personalizar accesorios para tu peludito.
+              Accede a tu cuenta para explorar el catálogo y gestionar tus
+              compras.
             </p>
 
             <form onSubmit={handleLoginSubmit}>
@@ -245,13 +204,6 @@ function Navbar({ tipo }) {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <a
-                href="#"
-                className="forgot"
-                onClick={(e) => e.preventDefault()}
-              >
-                ¿Olvidaste tu contraseña?
-              </a>
               <button type="submit" className="btn-primary">
                 Iniciar sesión
               </button>
@@ -267,11 +219,7 @@ function Navbar({ tipo }) {
 
       {/* MODAL DE REGISTRO */}
       {showRegister && (
-        <div
-          id="registerModal"
-          className="login-modal"
-          style={{ display: "flex" }}
-        >
+        <div className="login-modal" style={{ display: "flex" }}>
           <div className="login-box">
             <span
               className="close-modal"
@@ -286,7 +234,8 @@ function Navbar({ tipo }) {
             />
             <h2>Crear cuenta</h2>
             <p className="modal-subtitle">
-              Crea tu cuenta para diseñar accesorios únicos para tu peludito.
+              Crea tu cuenta para realizar compras y hacer seguimiento a tus
+              pedidos.
             </p>
             <form onSubmit={(e) => e.preventDefault()}>
               <label>Nombre completo</label>
@@ -294,8 +243,6 @@ function Navbar({ tipo }) {
               <label>Correo electrónico</label>
               <input type="email" placeholder="ejemplo@correo.com" />
               <label>Contraseña</label>
-              <input type="password" placeholder="********" />
-              <label>Confirmar contraseña</label>
               <input type="password" placeholder="********" />
               <button
                 className="btn-primary"
@@ -317,23 +264,12 @@ function Navbar({ tipo }) {
 
       {/* MODAL DE ERROR */}
       {showError && (
-        <div
-          className="modal-error"
-          id="errorModal"
-          style={{ display: "flex" }}
-        >
+        <div className="modal-error" style={{ display: "flex" }}>
           <div className="modal-error-content">
             <button className="modal-close" onClick={() => setShowError(false)}>
               ✕
             </button>
-            <div className="modal-error-logo">
-              <img
-                src="/Imagenes/logo verde nombre.png"
-                alt="Peluditos con estilo"
-              />
-            </div>
             <h2 className="modal-title">Revisa tu información</h2>
-            <div className="modal-icon">⚠️</div>
             <p className="modal-message">{errorMessage}</p>
             <button className="modal-btn" onClick={() => setShowError(false)}>
               Entendido
