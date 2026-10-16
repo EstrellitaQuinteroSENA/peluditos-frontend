@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Navbar({ tipo }) {
+function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
   const navigate = useNavigate();
 
   // Estado para verificar si hay sesión activa en tiempo real
@@ -12,47 +12,118 @@ function Navbar({ tipo }) {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [showError, setShowError] = useState(false);
-
-  // Campos de formulario
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  // Estado para saber si el aviso actual es un éxito de registro
+  const [isRegisterSuccess, setIsRegisterSuccess] = useState(false);
+
+  // Campos de formulario de Login
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
+  // Campos de formulario de Registro
+  const [regNombre, setRegNombre] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regPassword, setRegPassword] = useState("");
 
   // Verificar sesión al cargar el componente
   useEffect(() => {
-    const logged = localStorage.getItem("isLogged") === "true";
+    const token = localStorage.getItem("token");
     const role = localStorage.getItem("userRole");
-    setIsLogged(logged);
-    setUserRole(role);
+    if (token) {
+      setIsLogged(true);
+      setUserRole(role);
+    }
   }, []);
 
-  const handleLoginSubmit = (e) => {
+  // Efecto para abrir el modal de login si se solicita desde fuera (Catálogo/LandingPage)
+  useEffect(() => {
+    if (abrirLoginExterno) {
+      setShowRegister(false);
+      setShowLogin(true);
+      if (onLoginAbierto) onLoginAbierto();
+    }
+  }, [abrirLoginExterno]);
+
+  // Función para Iniciar Sesión conectada al Backend
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
 
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanPassword = password.trim();
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          correo: loginEmail.trim().toLowerCase(),
+          password: loginPassword.trim(),
+        }),
+      });
 
-    if (cleanEmail === "cliente@peluditos.com" && cleanPassword === "123456") {
-      localStorage.setItem("isLogged", "true");
-      localStorage.setItem("userRole", "client");
-      setIsLogged(true);
-      setUserRole("client");
-      setShowLogin(false);
-      resetForm();
-      navigate("/mis-pedidos");
-    } else if (
-      cleanEmail === "admin@peluditos.com" &&
-      cleanPassword === "admin123"
-    ) {
-      localStorage.setItem("isLogged", "true");
-      localStorage.setItem("userRole", "admin");
-      setIsLogged(true);
-      setUserRole("admin");
-      setShowLogin(false);
-      resetForm();
-      navigate("/admin");
-    } else {
-      setErrorMessage("Credenciales incorrectas. Revisa los datos de prueba.");
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("userRole", data.usuario.rol);
+        localStorage.setItem("usuario", JSON.stringify(data.usuario));
+        localStorage.setItem("isLogged", "true");
+
+        setIsLogged(true);
+        setUserRole(data.usuario.rol);
+        setShowLogin(false);
+        resetForms();
+
+        if (data.usuario.rol === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/mis-pedidos");
+        }
+      } else {
+        setIsRegisterSuccess(false);
+        setErrorMessage(data.message || "Credenciales incorrectas.");
+        setShowError(true);
+      }
+    } catch (error) {
+      console.error("Error de conexión:", error);
+      setIsRegisterSuccess(false);
+      setErrorMessage("No se pudo conectar con el servidor.");
+      setShowError(true);
+    }
+  };
+
+  // Función para Registrarse conectada al Backend (Usando el modal de la plataforma)
+  const handleRegisterSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/registro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre_completo: regNombre.trim(),
+          correo: regEmail.trim().toLowerCase(),
+          password: regPassword.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setShowRegister(false);
+        resetForms();
+        setIsRegisterSuccess(true); // Marcamos que fue un éxito
+        setErrorMessage(
+          "¡Cuenta creada con éxito! 🐾 Ya puedes iniciar sesión.",
+        );
+        setShowError(true); // Muestra tu modal bonito de la plataforma
+      } else {
+        setIsRegisterSuccess(false);
+        setErrorMessage(data.message || "Error al registrar el usuario.");
+        setShowError(true);
+      }
+    } catch (error) {
+      console.error("Error de conexión:", error);
+      setIsRegisterSuccess(false);
+      setErrorMessage("No se pudo conectar con el servidor.");
       setShowError(true);
     }
   };
@@ -64,9 +135,12 @@ function Navbar({ tipo }) {
     navigate("/");
   };
 
-  const resetForm = () => {
-    setEmail("");
-    setPassword("");
+  const resetForms = () => {
+    setLoginEmail("");
+    setLoginPassword("");
+    setRegNombre("");
+    setRegEmail("");
+    setRegPassword("");
   };
 
   const openLoginModal = () => {
@@ -77,6 +151,15 @@ function Navbar({ tipo }) {
   const openRegisterModal = () => {
     setShowLogin(false);
     setShowRegister(true);
+  };
+
+  // Controlar la acción del botón del modal de aviso
+  const handleModalClose = () => {
+    setShowError(false);
+    if (isRegisterSuccess) {
+      setIsRegisterSuccess(false);
+      setShowLogin(true); // Abre el login automáticamente al cerrar el aviso de éxito
+    }
   };
 
   // RENDER DE ENLACES
@@ -103,7 +186,6 @@ function Navbar({ tipo }) {
         </a>
         <a href="#catalogo">Catálogo</a>
 
-        {/* Solo se muestra Mis Pedidos si hay sesión activa */}
         {isLogged && (
           <a
             href="/mis-pedidos"
@@ -191,17 +273,17 @@ function Navbar({ tipo }) {
               <label>Correo electrónico</label>
               <input
                 type="email"
-                placeholder="cliente@peluditos.com o admin@peluditos.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="ejemplo@correo.com"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
                 required
               />
               <label>Contraseña</label>
               <input
                 type="password"
-                placeholder="123456 o admin123"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="********"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
                 required
               />
               <button type="submit" className="btn-primary">
@@ -237,23 +319,37 @@ function Navbar({ tipo }) {
               Crea tu cuenta para realizar compras y hacer seguimiento a tus
               pedidos.
             </p>
-            <form onSubmit={(e) => e.preventDefault()}>
+
+            <form onSubmit={handleRegisterSubmit}>
               <label>Nombre completo</label>
-              <input type="text" placeholder="Ej. María Gómez" />
+              <input
+                type="text"
+                placeholder="Ej. María Gómez"
+                value={regNombre}
+                onChange={(e) => setRegNombre(e.target.value)}
+                required
+              />
               <label>Correo electrónico</label>
-              <input type="email" placeholder="ejemplo@correo.com" />
+              <input
+                type="email"
+                placeholder="ejemplo@correo.com"
+                value={regEmail}
+                onChange={(e) => setRegEmail(e.target.value)}
+                required
+              />
               <label>Contraseña</label>
-              <input type="password" placeholder="********" />
-              <button
-                className="btn-primary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  openLoginModal();
-                }}
-              >
+              <input
+                type="password"
+                placeholder="********"
+                value={regPassword}
+                onChange={(e) => setRegPassword(e.target.value)}
+                required
+              />
+              <button type="submit" className="btn-primary">
                 Crear cuenta
               </button>
             </form>
+
             <p className="switch">
               ¿Ya tienes cuenta?{" "}
               <span onClick={openLoginModal}>Iniciar sesión</span>
@@ -262,16 +358,18 @@ function Navbar({ tipo }) {
         </div>
       )}
 
-      {/* MODAL DE ERROR */}
+      {/* MODAL DE AVISO / ERROR DEL SISTEMA */}
       {showError && (
         <div className="modal-error" style={{ display: "flex" }}>
           <div className="modal-error-content">
-            <button className="modal-close" onClick={() => setShowError(false)}>
+            <button className="modal-close" onClick={handleModalClose}>
               ✕
             </button>
-            <h2 className="modal-title">Revisa tu información</h2>
+            <h2 className="modal-title">
+              {isRegisterSuccess ? "¡Registro exitoso!" : "Aviso del sistema"}
+            </h2>
             <p className="modal-message">{errorMessage}</p>
-            <button className="modal-btn" onClick={() => setShowError(false)}>
+            <button className="modal-btn" onClick={handleModalClose}>
               Entendido
             </button>
           </div>
