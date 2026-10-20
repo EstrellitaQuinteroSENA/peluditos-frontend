@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
+import { API_URL } from "../config/api";
 
 function AdminPedidos() {
   const [pedidos, setPedidos] = useState([]);

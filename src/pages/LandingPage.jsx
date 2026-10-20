@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import ProductoModal from "../components/ProductoModal";
+import { API_URL } from "../config/api";
 
 function LandingPage() {
   const [bandanas, setBandanas] = useState([]);

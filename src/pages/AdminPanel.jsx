@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Navbar from "../components/Navbar";
+import { API_URL } from "../config/api";
 
 function AdminPanel() {
   const [bandanas, setBandanas] = useState([]);
@@ -137,9 +138,9 @@ function AdminPanel() {
     ) {
       try {
         const response = await fetch(
-        `${API_URL}/productos/${encodeURIComponent(idToDelete)}`,
-        { method: "DELETE" },
-      );
+          `${API_URL}/productos/${encodeURIComponent(idToDelete)}`,
+          { method: "DELETE" },
+        );
 
         if (response.ok) {
           cargarProductos();
