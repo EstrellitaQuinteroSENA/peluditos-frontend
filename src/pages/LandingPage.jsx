@@ -27,7 +27,7 @@ function LandingPage() {
 
   // Consume la API REST del backend al cargar el componente para poblar el catálogo de productos.
   useEffect(() => {
-    fetch("http://localhost:5000/api/productos")
+    fetch(`${API_URL}/productos`)
       .then((res) => res.json())
       .then((data) => {
         const productosConImagen = data.map((item) => ({

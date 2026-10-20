@@ -64,7 +64,7 @@ function AdminPanel() {
   // Obtiene el catálogo actualizado de productos desde la base de datos MySQL.
   const cargarProductos = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/productos");
+      const response = await fetch(`${API_URL}/productos`);
       if (response.ok) {
         const data = await response.json();
         const productosMapeados = data.map((item) => ({
@@ -137,9 +137,9 @@ function AdminPanel() {
     ) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/productos/${encodeURIComponent(idToDelete)}`,
-          { method: "DELETE" },
-        );
+        `${API_URL}/productos/${encodeURIComponent(idToDelete)}`,
+        { method: "DELETE" },
+      );
 
         if (response.ok) {
           cargarProductos();
@@ -257,8 +257,8 @@ function AdminPanel() {
 
     try {
       const url = editingId
-        ? `http://localhost:5000/api/productos/${encodeURIComponent(editingId)}`
-        : "http://localhost:5000/api/productos";
+        ? `${API_URL}/productos/${encodeURIComponent(editingId)}`
+        : `${API_URL}/productos`;
       const method = editingId ? "PUT" : "POST";
 
       const response = await fetch(url, {
