@@ -7,7 +7,21 @@ function MisPedidos() {
   const [compraPendiente, setCompraPendiente] = useState(null);
   const [comprobante, setComprobante] = useState(null);
 
-  // Cargar pedidos del usuario e inspeccionar compras pendientes
+  // Formatea la URL de las imágenes obtenidas desde el servidor backend.
+  const formatearUrlImagen = (url) => {
+    if (!url) return "/Imagenes/Perro.png";
+    if (
+      url.startsWith("http://") ||
+      url.startsWith("https://") ||
+      url.startsWith("data:") ||
+      url.startsWith("blob:")
+    ) {
+      return url;
+    }
+    return `http://localhost:5000${url.startsWith("/") ? "" : "/"}${url}`;
+  };
+
+  // Carga los pedidos del usuario autenticado e inspecciona si existe alguna intención de compra pendiente en el almacenamiento local.
   useEffect(() => {
     fetchMisPedidos();
 
@@ -18,6 +32,7 @@ function MisPedidos() {
     }
   }, []);
 
+  // Realiza una petición HTTP GET para obtener el listado de pedidos asociados al usuario actual.
   const fetchMisPedidos = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -37,6 +52,7 @@ function MisPedidos() {
     }
   };
 
+  // Valida el comprobante de pago y envía la orden pendiente hacia el backend mediante un objeto FormData.
   const confirmarYGuardarPedido = async () => {
     if (!comprobante) {
       alert("Por favor adjunta el comprobante para continuar.");
@@ -46,7 +62,7 @@ function MisPedidos() {
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
-      formData.append("id_producto", compraPendiente.producto.id_producto);
+      formData.append("id_producto", compraPendiente.producto.id_producto || compraPendiente.producto.id);
       formData.append("talla", compraPendiente.talla);
       formData.append("cantidad", compraPendiente.cantidad);
       formData.append("total", compraPendiente.total);
@@ -61,7 +77,7 @@ function MisPedidos() {
       if (res.ok) {
         alert("¡Pedido registrado exitosamente! Ha quedado en la tabla con estado Pendiente.");
         setCompraPendiente(null);
-        fetchMisPedidos(); // Refresca la tabla para ver el nuevo pedido
+        fetchMisPedidos();
       } else {
         const err = await res.json();
         alert(err.message || "Error al guardar el pedido.");
@@ -82,7 +98,6 @@ function MisPedidos() {
           Aquí podrás ver el historial y estado de tus compras.
         </p>
 
-        {/* TABLA DE PEDIDOS */}
         {cargando ? (
           <p style={{ textAlign: "center", color: "#888" }}>Cargando tus pedidos... 🐾</p>
         ) : pedidos.length === 0 ? (
@@ -95,6 +110,7 @@ function MisPedidos() {
               <thead>
                 <tr style={styles.encabezadoTabla}>
                   <th style={styles.th}># Pedido</th>
+                  <th style={styles.th}>Imagen</th>
                   <th style={styles.th}>Producto</th>
                   <th style={styles.th}>Talla</th>
                   <th style={styles.th}>Cantidad</th>
@@ -106,11 +122,22 @@ function MisPedidos() {
                 {pedidos.map((p, index) => (
                   <tr key={p.id_pedido || index} style={styles.filaTabla}>
                     <td style={styles.td}>P-00{p.id_pedido}</td>
-                    <td style={styles.td}>{p.nombre_producto || p.producto}</td>
-                    <td style={styles.td}><strong>{p.talla}</strong></td>
-                    <td style={styles.td}>{p.cantidad}</td>
+                    <td style={styles.td}>
+                      <img 
+                        src={formatearUrlImagen(p.imagen)} 
+                        alt={p.nombre_producto || "Accesorio"} 
+                        style={{ width: "45px", height: "45px", objectFit: "cover", borderRadius: "6px", border: "1px solid #ddd" }} 
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "/Imagenes/Perro.png";
+                        }}
+                      />
+                    </td>
+                    <td style={styles.td}>{p.nombre_producto || p.producto || "Bandana"}</td>
+                    <td style={styles.td}><strong>{p.talla || 'M'}</strong></td>
+                    <td style={styles.td}>{p.cantidad || 1}</td>
                     <td style={{ ...styles.td, color: "#124e3f", fontWeight: "bold" }}>
-                      ${Number(p.total).toLocaleString("es-CO")}
+                      ${Number(p.total || p.precio_total || 0).toLocaleString("es-CO")}
                     </td>
                     <td style={styles.td}>
                       <span style={{
@@ -118,10 +145,10 @@ function MisPedidos() {
                         borderRadius: "12px",
                         fontSize: "0.85rem",
                         fontWeight: "bold",
-                        backgroundColor: p.estado === 'Verificado' ? '#d4edda' : '#fff3cd',
-                        color: p.estado === 'Verificado' ? '#155724' : '#856404'
+                        backgroundColor: (p.estado_pedido || p.estado) === 'Verificado' ? '#d4edda' : '#fff3cd',
+                        color: (p.estado_pedido || p.estado) === 'Verificado' ? '#155724' : '#856404'
                       }}>
-                        {p.estado || 'Pendiente de pago'}
+                        {p.estado_pedido || p.estado || 'Pendiente de verificación'}
                       </span>
                     </td>
                   </tr>
@@ -132,7 +159,6 @@ function MisPedidos() {
         )}
       </div>
 
-      {/* 🚀 MODAL BONITO DE NEQUI CON RESUMEN PARA COMPRAS PENDIENTES */}
       {compraPendiente && (
         <div style={styles.overlay}>
           <div style={styles.modal}>
@@ -142,7 +168,6 @@ function MisPedidos() {
               <img src="/Imagenes/logo verde nombre.png" alt="Logo" style={{ height: "35px", marginBottom: "5px" }} />
               <h2 style={{ color: "#124e3f", margin: "5px 0" }}>Pagar tu pedido</h2>
               
-              {/* Resumen completo de la compra */}
               <div style={styles.resumenBox}>
                 <p style={{ margin: "2px 0", fontWeight: "bold", color: "#124e3f" }}>
                   Producto: <span style={{ color: "#333", fontWeight: "normal" }}>{compraPendiente.producto.nombre}</span>
@@ -205,7 +230,7 @@ const styles = {
   tabla: { width: "100%", borderCollapse: "collapse", marginTop: "20px", background: "#fff", borderRadius: "8px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" },
   encabezadoTabla: { backgroundColor: "#124e3f", color: "#fff" },
   th: { padding: "12px 15px", textAlign: "left", fontSize: "0.95rem" },
-  td: { padding: "12px 15px", borderBottom: "1px solid #eee", fontSize: "0.9rem", color: "#444" },
+  td: { padding: "12px 15px", borderBottom: "1px solid #eee", fontSize: "0.9rem", color: "#444", verticalAlign: "middle" },
   filaTabla: { textAlign: "left" },
   resumenBox: { background: "#f4f8f6", padding: "8px 12px", borderRadius: "8px", border: "1px solid #d0e1d4", textAlign: "left" },
   nequiCard: { background: "#fdfdfd", padding: "12px", borderRadius: "10px", margin: "8px 0", border: "1px solid #e0e0e0" },

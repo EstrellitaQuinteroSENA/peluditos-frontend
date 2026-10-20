@@ -6,21 +6,35 @@ function LandingPage() {
   const [bandanas, setBandanas] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  // Estado para la bandana seleccionada
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
-
-  // Estado para ordenar al Navbar que abra el modal de inicio de sesión
   const [forzarAbrirLogin, setForzarAbrirLogin] = useState(false);
 
-  // Verificar si hay un token de usuario autenticado
   const usuarioAutenticado = Boolean(localStorage.getItem("token"));
 
-  // Consumir la API de productos al cargar la página
+  // Formatea la URL de las imágenes obtenidas desde el servidor backend.
+  const formatearUrlImagen = (url) => {
+    if (!url) return "/Imagenes/Perro.png";
+    if (
+      url.startsWith("http://") ||
+      url.startsWith("https://") ||
+      url.startsWith("data:") ||
+      url.startsWith("blob:")
+    ) {
+      return url;
+    }
+    return `http://localhost:5000${url.startsWith("/") ? "" : "/"}${url}`;
+  };
+
+  // Consume la API REST del backend al cargar el componente para poblar el catálogo de productos.
   useEffect(() => {
     fetch("http://localhost:5000/api/productos")
       .then((res) => res.json())
       .then((data) => {
-        setBandanas(data);
+        const productosConImagen = data.map((item) => ({
+          ...item,
+          imagen_url: formatearUrlImagen(item.imagen_url),
+        }));
+        setBandanas(productosConImagen);
         setCargando(false);
       })
       .catch((error) => {
@@ -29,21 +43,19 @@ function LandingPage() {
       });
   }, []);
 
-  // Función que se ejecuta al hacer clic en "Iniciar sesión para comprar" desde el modal de la bandana
+  // Cierra el modal de detalle del producto y activa el estado para abrir el inicio de sesión desde el componente Navbar.
   const abrirLoginModal = () => {
-    setProductoSeleccionado(null); // Cierra la ventana de la bandana
-    setForzarAbrirLogin(true); // Ordena al Navbar que despliegue el modal de login
+    setProductoSeleccionado(null);
+    setForzarAbrirLogin(true);
   };
 
   return (
     <div>
-      {/* Barra de navegación superior conectada para abrir el login externamente */}
       <Navbar
         abrirLoginExterno={forzarAbrirLogin}
         onLoginAbierto={() => setForzarAbrirLogin(false)}
       />
 
-      {/* Sección principal de presentación (Hero) */}
       <section className="hero">
         <img src="/Imagenes/Perro.png" className="hero-img left" alt="Perro" />
 
@@ -63,7 +75,6 @@ function LandingPage() {
         <img src="/Imagenes/Gato.png" className="hero-img right" alt="Gato" />
       </section>
 
-      {/* Sección del catálogo de productos dinámico */}
       <section className="catalogo" id="catalogo">
         <h2>Nuestras bandanas</h2>
 
@@ -84,20 +95,20 @@ function LandingPage() {
                 onClick={() => setProductoSeleccionado(item)}
                 style={{ cursor: "pointer" }}
               >
-                {item.imagen_url ? (
-                  <img
-                    src={item.imagen_url}
-                    alt={item.nombre}
-                    style={{
-                      width: "100%",
-                      height: "180px",
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                    }}
-                  />
-                ) : (
-                  <div className="img-placeholder"></div>
-                )}
+                <img
+                  src={item.imagen_url}
+                  alt={item.nombre}
+                  style={{
+                    width: "100%",
+                    height: "180px",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                  }}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/Imagenes/Perro.png";
+                  }}
+                />
                 <p style={{ fontWeight: "bold", marginTop: "10px" }}>
                   {item.nombre}
                 </p>
@@ -114,7 +125,6 @@ function LandingPage() {
         </a>
       </section>
 
-      {/* Ventana modal del detalle del producto */}
       {productoSeleccionado && (
         <ProductoModal
           producto={productoSeleccionado}

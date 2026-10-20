@@ -14,13 +14,11 @@ function AdminPanel() {
     "Poliéster",
   ]);
 
-  // Filtros
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstilo, setFiltroEstilo] = useState("Todos");
   const [filtroTalla, setFiltroTalla] = useState("Todas");
   const [filtroMaterial, setFiltroMaterial] = useState("Todos");
 
-  // Modo edición / creación
   const [editingId, setEditingId] = useState(null);
   const [isNuevoEstilo, setIsNuevoEstilo] = useState(false);
   const [isNuevoMaterial, setIsNuevoMaterial] = useState(false);
@@ -41,6 +39,7 @@ function AdminPanel() {
   });
 
   const [imagenPreview, setImagenPreview] = useState(null);
+  const [imagenFile, setImagenFile] = useState(null);
   const fileInputRef = useRef(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -48,6 +47,21 @@ function AdminPanel() {
     cargarProductos();
   }, []);
 
+  // Formatea la dirección URL de las imágenes gestionadas por el servidor backend.
+  const formatearUrlImagen = (url) => {
+    if (!url) return null;
+    if (
+      url.startsWith("http://") ||
+      url.startsWith("https://") ||
+      url.startsWith("data:") ||
+      url.startsWith("blob:")
+    ) {
+      return url;
+    }
+    return `http://localhost:5000${url.startsWith("/") ? "" : "/"}${url}`;
+  };
+
+  // Obtiene el catálogo actualizado de productos desde la base de datos MySQL.
   const cargarProductos = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/productos");
@@ -66,7 +80,7 @@ function AdminPanel() {
           stockTotal: item.stock_total || 0,
           precio: item.precio,
           descripcion: item.descripcion,
-          imagen: item.imagen_url,
+          imagen: formatearUrlImagen(item.imagen_url),
         }));
         setBandanas(productosMapeados);
       }
@@ -81,6 +95,7 @@ function AdminPanel() {
     setShowModal(true);
   };
 
+  // Carga la información del producto seleccionado en el formulario para su modificación.
   const handleEdit = (item) => {
     setEditingId(item.id);
 
@@ -107,11 +122,13 @@ function AdminPanel() {
     });
 
     setImagenPreview(item.imagen || null);
+    setImagenFile(null);
     setIsNuevoEstilo(false);
     setIsNuevoMaterial(false);
     setShowModal(true);
   };
 
+  // Envía una solicitud de eliminación del producto al API backend.
   const handleDelete = async (idToDelete) => {
     if (
       window.confirm(
@@ -119,7 +136,6 @@ function AdminPanel() {
       )
     ) {
       try {
-        // Codificamos el id para evitar errores con el #
         const response = await fetch(
           `http://localhost:5000/api/productos/${encodeURIComponent(idToDelete)}`,
           { method: "DELETE" },
@@ -157,6 +173,7 @@ function AdminPanel() {
       descripcion: "",
     });
     setImagenPreview(null);
+    setImagenFile(null);
     setIsNuevoEstilo(false);
     setIsNuevoMaterial(false);
     setEditingId(null);
@@ -177,9 +194,8 @@ function AdminPanel() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setImagenPreview(reader.result);
-      reader.readAsDataURL(file);
+      setImagenFile(file);
+      setImagenPreview(URL.createObjectURL(file));
     }
   };
 
@@ -195,6 +211,7 @@ function AdminPanel() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Procesa el envío del formulario mediante FormData para actualizar o crear productos con imágenes en el backend.
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -220,21 +237,23 @@ function AdminPanel() {
       setListaMateriales((prev) => [...prev, materialFinal]);
     }
 
-    const bandanaData = {
-      codigo: siguienteId,
-      estilo: estiloFinal,
-      nombre: formData.nombre,
-      material: materialFinal,
-      stockXS: Number(formData.stockXS),
-      stockS: Number(formData.stockS),
-      stockM: Number(formData.stockM),
-      stockL: Number(formData.stockL),
-      stockXL: Number(formData.stockXL),
-      stockTotal: stockTotalCalculado,
-      precio: formData.precio,
-      descripcion: formData.descripcion,
-      imagen: imagenPreview,
-    };
+    const dataForm = new FormData();
+    dataForm.append("codigo", siguienteId);
+    dataForm.append("estilo", estiloFinal);
+    dataForm.append("nombre", formData.nombre);
+    dataForm.append("material", materialFinal);
+    dataForm.append("stockXS", Number(formData.stockXS));
+    dataForm.append("stockS", Number(formData.stockS));
+    dataForm.append("stockM", Number(formData.stockM));
+    dataForm.append("stockL", Number(formData.stockL));
+    dataForm.append("stockXL", Number(formData.stockXL));
+    dataForm.append("stockTotal", stockTotalCalculado);
+    dataForm.append("precio", formData.precio);
+    dataForm.append("descripcion", formData.descripcion);
+
+    if (imagenFile) {
+      dataForm.append("imagen", imagenFile);
+    }
 
     try {
       const url = editingId
@@ -244,8 +263,7 @@ function AdminPanel() {
 
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bandanaData),
+        body: dataForm,
       });
 
       if (response.ok) {
@@ -267,7 +285,7 @@ function AdminPanel() {
     }
   };
 
-  // Filtrado
+  // Aplica los criterios de búsqueda y filtros seleccionados sobre la lista de productos.
   const bandanasFiltradas = bandanas.filter((item) => {
     const coincideTexto =
       item.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -395,13 +413,16 @@ function AdminPanel() {
                   <td>
                     {item.imagen ? (
                       <img
-                        src={item.imagen}
+                        src={formatearUrlImagen(item.imagen)}
                         alt={item.nombre}
                         style={{
                           width: "40px",
                           height: "40px",
                           objectFit: "cover",
                           borderRadius: "8px",
+                        }}
+                        onError={(e) => {
+                          e.target.src = "/Imagenes/Perro.png";
                         }}
                       />
                     ) : (
@@ -467,13 +488,16 @@ function AdminPanel() {
                   <div className="image-preview-box">
                     {imagenPreview ? (
                       <img
-                        src={imagenPreview}
+                        src={formatearUrlImagen(imagenPreview)}
                         alt="Vista previa"
                         style={{
                           width: "100%",
                           height: "100%",
                           objectFit: "cover",
                           borderRadius: "8px",
+                        }}
+                        onError={(e) => {
+                          e.target.src = "/Imagenes/Perro.png";
                         }}
                       />
                     ) : (

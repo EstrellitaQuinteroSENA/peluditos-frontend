@@ -10,7 +10,7 @@
 }
 
 /* Reset básico */
-*{
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -22,10 +22,9 @@ body {
     color: var(--gris-carbon);
 }
 
-/*-----COMPONENETES-----*/
+/*----- COMPONENTES -----*/
 
-/* ----- BOTONES BASE ----- */
-
+/* Botones Base */
 .btn {
     display: inline-block;
     padding: 10px 22px;
@@ -40,38 +39,33 @@ body {
                 box-shadow 0.3s ease;
 }
 
-/*-----HEADER-----*/
-
+/*----- HEADER -----*/
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 20px 60px;
     background-color: var(--blanco);
-}
-
-.logo img {
-    height: 60px;     
-    width: auto;
-}
-
-.header {
-    position: sticky;   
+    position: sticky;
     top: 0;
     z-index: 1000;
-    background-color: var(--blanco);
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px; 
 }
 
 .logo {
     font-size: 24px;
     font-weight: 600;
     color: var(--verde-bosque);
+}
+
+.logo img {
+    height: 60px;    
+    width: auto;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px; 
 }
 
 .nav a {
@@ -84,22 +78,6 @@ body {
 .nav a:hover {
     color: var(--verde-bosque);
     font-weight: 700;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 60px;
-    background-color: var(--blanco);
-}
-
-.hero {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 80px 60px;
-    background-color: var(--gris-piedra);
 }
 
 .btn-header-green {
@@ -126,14 +104,7 @@ body {
     transform: translateY(-1px);
 }
 
-.header {
-    position: sticky;   
-    top: 0;
-    z-index: 1000;
-    background-color: var(--blanco);
-}
-
-/*-----HERO-----*/
+/*----- HERO -----*/
 .hero {
     display: flex;
     justify-content: space-between;
@@ -178,66 +149,7 @@ body {
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
-@media (max-width: 900px) {
-    .hero {
-        flex-direction: column;
-        text-align: center;
-        padding: 60px 20px;
-        gap: 30px;
-    }
-
-    .hero-img {
-        width: 220px;
-    }
-
-    .hero-text h1 {
-        font-size: 26px;
-    }
-}
-
-@media (max-width: 480px) {
-    .hero-img {
-        width: 180px;
-    }
-
-    .hero-text h1 {
-        font-size: 22px;
-    }
-
-    .hero-text p {
-        font-size: 15px;
-    }
-}
-
-/* --- AJUSTES RESPONSIVOS PARA EL HEADER (MÓVIL) --- */
-@media (max-width: 600px) {
-    .header {
-        flex-direction: column;  
-        padding: 15px 10px;      
-        gap: 15px;             
-    }
-
-    .nav {
-        display: flex;
-        flex-wrap: wrap;         
-        justify-content: center; 
-        gap: 10px;               
-    }
-
-    .nav a {
-        margin-right: 0px;      
-        font-size: 14px;
-    }
-
-    .header-right {
-        justify-content: center; 
-        width: 100%;
-    }
-}
-
-
-/* ----- CATÁLOGO ----- */
-
+/*----- CATÁLOGO -----*/
 .catalogo {
     padding: 80px 60px;
     text-align: center;
@@ -257,7 +169,6 @@ body {
     gap: 35px;
     max-width: 1100px;
     margin: 0 auto 40px auto;
-    transition: transition 0.2s;
 }
 
 .card {
@@ -300,9 +211,50 @@ body {
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
+/*----- MEDIA QUERIES GENERALES -----*/
 @media (max-width: 900px) {
+    .hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 60px 20px;
+        gap: 30px;
+    }
+
+    .hero-img {
+        width: 220px;
+    }
+
+    .hero-text h1 {
+        font-size: 26px;
+    }
+
     .grid-collares {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .header {
+        flex-direction: column;  
+        padding: 15px 10px;       
+        gap: 15px;             
+    }
+
+    .nav {
+        display: flex;
+        flex-wrap: wrap;        
+        justify-content: center; 
+        gap: 10px;               
+    }
+
+    .nav a {
+        margin-right: 0px;      
+        font-size: 14px;
+    }
+
+    .header-right {
+        justify-content: center; 
+        width: 100%;
     }
 }
 
@@ -312,8 +264,21 @@ body {
     }
 }
 
-/* ----- FOOTER ----- */
+@media (max-width: 480px) {
+    .hero-img {
+        width: 180px;
+    }
 
+    .hero-text h1 {
+        font-size: 22px;
+    }
+
+    .hero-text p {
+        font-size: 15px;
+    }
+}
+
+/*----- FOOTER -----*/
 .footer {
     background-color: var(--verde-bosque);
     color: var(--blanco);
@@ -331,7 +296,7 @@ body {
 }
 
 .footer-logo {
-    width: 80px;   
+    width: 80px;    
     height: auto;
     margin-bottom: 10px;
 }
@@ -341,15 +306,14 @@ body {
     flex-direction: column;
     align-items: center;  
     text-align: center;   
-    gap: 10px;             
+    gap: 10px;            
 }
 
 .footer-col.footer-brand {
     align-items: center;
 }
 
-/* Columnas */
-
+/* Columnas del Footer */
 .footer-col {
     display: flex;
     flex-direction: column;
@@ -371,7 +335,7 @@ body {
     color: rgba(255, 255, 255, 0.85);
 }
 
-/* Listas */
+/* Listas del Footer */
 .footer-col ul {
     list-style: none;
     padding: 0px;
@@ -393,7 +357,7 @@ body {
     color: var(--amarillo);
 }
 
-/* Redes */
+/* Redes Sociales */
 .footer-socials {
     display: flex;
     gap: 15px;
@@ -410,7 +374,7 @@ body {
     transform: scale(1.2);
 }
 
-/* Parte inferior */
+/* Parte Inferior del Footer */
 .footer-bottom {
     border-top: 1px solid rgba(255, 255, 255, 0.2);
     text-align: center;
@@ -419,6 +383,7 @@ body {
     color: rgba(255, 255, 255, 0.8);
 }
 
+/*----- MEDIA QUERIES DEL FOOTER -----*/
 @media (max-width: 900px) {
     .footer-container {
         grid-template-columns: repeat(2, 1fr);
@@ -434,9 +399,6 @@ body {
     .footer-socials {
         justify-content: center;
     }
-}
-
-@media (max-width: 500px) {
 
     .footer-brand {
         align-items: center;
@@ -447,239 +409,7 @@ body {
     }
 }
 
-/* ----- seccion diseño bandana----- */
-
-.design-page {
-    padding: 60px;
-    background-color: var(--gris-piedra);
-}
-
-.page-title {
-    text-align: center;
-    font-size: 32px;
-    color: var(--verde-bosque);
-    margin-bottom: 40px;
-}
-
-.design-container {
-    display: grid;
-    grid-template-columns: 420px 1fr;
-    gap: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.options-panel {
-    background-color: var(--blanco);
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-}
-
-.option-group {
-    margin-bottom: 30px;
-}
-
-.option-group h3 {
-    font-size: 18px;
-    color: var(--verde-bosque);
-    margin-bottom: 10px;
-}
-
-.sub-title {
-    font-size: 14px;
-    font-weight: 600;
-    margin: 10px 0 6px;
-    color: var(--gris-carbon);
-}
-
-.help-text {
-    font-size: 13px;
-    margin-bottom: 10px;
-}
-
-.help-text a {
-    color: var(--verde-bosque);
-    text-decoration: underline;
-    }
-
-.sizes {
-    display: flex;
-    gap: 12px;
-}
-
-.sizes span {
-    padding: 8px 14px;
-    border-radius: 10px;
-    border: 2px solid var(--verde-bosque);
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.sizes span.active {
-    background-color: var(--verde-bosque);
-    color: var(--blanco);
-}
-
-.slider {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.arrow {
-    background: none;
-    border: none;
-    font-size: 22px;
-    cursor: pointer;
-    color: var(--verde-bosque);
-}
-
-.slider-track {
-    display: flex;
-    gap: 12px;
-    overflow: hidden;
-    width: 280px; 
-}
-.color {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    flex-shrink: 0;          
-    border: 2px solid #ddd;
-    cursor: pointer;
-}
-
-/* Ejemplo de colores */
-.color-1 { background: #185B4F; }
-.color-2 { background: #A8D5C2; }
-.color-3 { background: #D4A72C; }
-.color-4 { background: #000000; }
-.color-5 { background: #FFFFFF; }
-.color-6 { background: #C0392B; }
-.color-7 { background: #8E44AD; }
-.color-8 { background: #2980B9; }
-.color-9 { background: #27AE60; }
-.color-10 { background: #F39C12; }
-
-.pattern {
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    object-fit: cover;
-    cursor: pointer;
-    border: 2px solid #ddd;
-}
-
-.sticker {
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-}
-
-.option-group input[type="text"] {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-}
-
-.preview-panel {
-    background-color: var(--blanco);
-    padding: 30px;
-    border-radius: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-}
-
-.preview-box {
-    height: 380px;
-    background-color: var(--gris-piedra);
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    color: var(--gris-medio);
-    margin-bottom: 20px;
-}
-.btn-primary {
-    background-color: var(--amarillo);
-    border: none;
-    padding: 14px;
-    font-size: 15px;
-    font-weight: 600;
-    border-radius: 14px;
-    cursor: pointer;
-}
-
-.btn-primary:hover {
-    background-color: var(--blanco);
-    border: 2px solid var(--amarillo);
-}
-
-@media (max-width: 900px) {
-    .design-container {
-        grid-template-columns: 1fr;
-    }
-
-    .options-panel {
-        order: 2;
-    }
-
-    .preview-panel {
-        order: 1;
-    }
-
-    .preview-box {
-        height: 300px;
-    }
-}
-
-@media (max-width: 500px) {
-    .design-page {
-        padding: 20px 10px; /* Reduce los 60px para que quepa en el celular */
-    }
-
-    .page-title {
-        font-size: 24px;
-        margin-bottom: 20px;
-    }
-
-    .design-container {
-        width: 100%;
-        gap: 20px;
-        padding: 0 5px;
-        box-sizing: border-box;
-    }
-
-    .options-panel, .preview-panel {
-        padding: 20px 15px; 
-        border-radius: 15px;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .slider {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .slider-track {
-        width: 180px; 
-        overflow-x: auto; 
-    }
-
-    .preview-box {
-        height: 250px; 
-    }
-}
-
-/* MODAL LOGIN */
-
+/*----- MODAL LOGIN -----*/
 .login-modal {
     position: fixed;
     inset: 0;
@@ -706,12 +436,20 @@ body {
     color: var(--verde-bosque);
 }
 
+.login-box label {
+    font-size: 13px;
+    text-align: left;
+    width: 100%;
+    margin-bottom: 4px;
+    color: var(--gris-carbon);
+}
+
 .login-box input {
     width: 100%;
     padding: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     border-radius: 10px;
-    border: 1px solid #ccc;
+    border: 2px solid var(--verde-bosque);
 }
 
 .close-modal {
@@ -736,19 +474,6 @@ body {
     font-size: 13px;
     color: var(--gris-medio);
     margin-bottom: 20px;
-}
-
-.login-box label {
-    font-size: 13px;
-    text-align: left;
-    width: 100%;
-    margin-bottom: 4px;
-    color: var(--gris-carbon);
-}
-
-.login-box input {
-    margin-bottom: 14px;
-    border: 2px solid var(--verde-bosque);
 }
 
 .forgot {
@@ -781,8 +506,7 @@ body {
     margin-right: 10px;
 }
 
-/* ===== MODAL ERROR ===== */
-
+/*----- MODAL ERROR -----*/
 .modal-error {
     position: fixed;
     inset: 0;
@@ -806,7 +530,6 @@ body {
     animation: modalFadeIn 0.3s ease;
 }
 
-/* Animación */
 @keyframes modalFadeIn {
     from {
         opacity: 0;
@@ -818,7 +541,6 @@ body {
     }
 }
 
-/* Botón cerrar */
 .modal-close {
     position: absolute;
     top: 18px;
@@ -835,7 +557,6 @@ body {
     transform: scale(1.2);
 }
 
-/* Logo */
 .modal-error-logo {
     display: flex;
     justify-content: center;
@@ -846,7 +567,6 @@ body {
     width: 60px;
 }
 
-/* Título */
 .modal-title {
     color: var(--amarillo);
     font-size: 22px;
@@ -854,14 +574,12 @@ body {
     font-weight: 600;
 }
 
-/* Icono advertencia */
 .modal-icon {
     font-size: 42px;
     margin-bottom: 10px;
     color: var(--amarillo);
 }
 
-/* Mensaje */
 .modal-message {
     font-size: 14.5px;
     color: #666;
@@ -869,7 +587,6 @@ body {
     line-height: 1.5;
 }
 
-/* Botón */
 .modal-btn {
     background: var(--amarillo);
     color: var(--blanco);
@@ -887,20 +604,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* Responsive */
-@media (max-width: 480px) {
-    .modal-error-content {
-        padding: 30px 22px 35px;
-    }
-
-    .modal-title {
-        font-size: 20px;
-    }
-}
-
-/* --- NUEVOS ESTILOS PERSONALIZADOS --- */
-
-/* 1. Color amarillo para Mis Pedidos */
+/*----- ESTILOS PERSONALIZADOS ADICIONALES -----*/
 .nav-orders {
     color: var(--amarillo) !important;
     font-weight: 700 !important;
@@ -910,7 +614,6 @@ body {
     color: var(--verde-bosque) !important;
 }
 
-/* 2. Estilo para los botones de talla */
 .size-btn {
     padding: 8px 14px;
     border-radius: 10px;
@@ -923,26 +626,23 @@ body {
     color: var(--gris-carbon);
 }
 
-/* 3. Color cuando la talla está seleccionada */
 .size-btn.active {
     background-color: var(--verde-bosque);
     color: var(--blanco);
 }
 
-/* 4. Efecto al pasar el mouse sobre las tallas */
 .size-btn:hover:not(.active) {
     background-color: var(--verde-salvia);
 }
 
-/* ===== MODAL GUIA TALLAS===== */
-
+/*----- MODAL GUÍA DE TALLAS -----*/
 .modal-guia {
     width: 500px;
     max-width: 95%;
     padding: 20px;
     background-color: var(--blanco); 
     border-radius: 20px;
-    margin: 0 auto;                 
+    margin: 0 auto;                
 }
 
 .guia-img-container {
@@ -1032,9 +732,18 @@ body {
     z-index: 2000;            
 }
 
-/* ===== MODAL GUIA PAGO===== */
+/*----- MEDIA QUERIES MODALES -----*/
+@media (max-width: 480px) {
+    .modal-error-content {
+        padding: 30px 22px 35px;
+    }
 
-/* Contenedor principal del modal de pago */
+    .modal-title {
+        font-size: 20px;
+    }
+}
+
+/*----- MODAL GUÍA DE PAGO -----*/
 #paymentGuideModal .modal-guia {
     width: 450px;
     max-width: 90%;
@@ -1049,13 +758,11 @@ body {
     margin-bottom: 20px;
 }
 
-/* Texto destacado 'Mis pedidos' */
 .highlight-text {
     color: var(--amarillo);
     font-weight: 600;
 }
 
-/* Contenedor de información Nequi */
 .payment-details {
     display: flex;
     align-items: center;
@@ -1076,7 +783,6 @@ body {
     color: var(--verde-bosque);
 }
 
-/* Notas de seguridad y botones */
 .security-note {
     font-size: 12px;
     color: var(--verde-bosque);
@@ -1092,7 +798,6 @@ body {
     gap: 10px;
 }
 
-/* Botón cancelar personalizado */
 .modal-actions .btn-header-outline {
     width: 160px;
     padding: 10px;
@@ -1101,7 +806,6 @@ body {
     cursor: pointer;
 }
 
-/* Botón Confirmar y enviar pago */
 .modal-actions .btn-primary {
     width: 100%;
     max-width: 280px;
@@ -1112,15 +816,13 @@ body {
     font-size: 16px;
 }
 
-/* ===== MODAL MIS PEDIDOS ===== */
-
+/*----- MODAL MIS PEDIDOS -----*/
 .modal-pedidos {
     width: 800px;
     max-width: 95%;
     padding: 30px;
 }
 
-/* Contenedor de las tarjetas */
 .orders-container {
     margin: 25px 0;
     display: flex;
@@ -1128,7 +830,6 @@ body {
     gap: 20px;
 }
 
-/* Diseño de cada tarjeta de pedido */
 .order-card {
     background: var(--blanco);
     border-radius: 20px;
@@ -1167,13 +868,11 @@ body {
     border-radius: 4px;
 }
 
-/* Estado del pedido */
 .status-pending {
     color: var(--verde-bosque) !important;
     font-style: italic;
 }
 
-/* Botón Adjuntar Pago  */
 .btn-adjuntar {
     background-color: #1a4d44; 
     color: var(--blanco);
@@ -1190,7 +889,6 @@ body {
     background-color: var(--verde-bosque);
 }
 
-/* Nota pequeña al pie del modal */
 .modal-note-small {
     font-size: 12px;
     color: var(--verde-bosque);
@@ -1198,15 +896,13 @@ body {
     margin-bottom: 20px;
 }
 
-/* Botón Continuar nuevo diseño */
 .modal-pedidos .btn-primary {
     width: auto;
     padding: 12px 40px;
     background-color: var(--amarillo);
 }
 
-
-/* ----- AJUSTES PARA CELULAR (RESPONSIVO) ----- */
+/*----- MEDIA QUERIES GENERALES / RESPONSIVO -----*/
 @media (max-width: 768px) {
     .header {
         flex-direction: column; 

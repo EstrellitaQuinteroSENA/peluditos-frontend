@@ -8,21 +8,21 @@ const ProductoModal = ({ producto, onClose, usuarioAutenticado, abrirLogin }) =>
   const [mostrarPagoNequi, setMostrarPagoNequi] = useState(false);
   const [comprobante, setComprobante] = useState(null);
 
-  // 🚚 Estados para el tipo de envío y datos de contacto
-  const [tipoEnvio, setTipoEnvio] = useState('domicilio'); // 'domicilio' o 'recoger'
+  const [tipoEnvio, setTipoEnvio] = useState('domicilio');
   const [telefonoContacto, setTelefonoContacto] = useState('');
+  const [cedula, setCedula] = useState('');
+  const [ciudad, setCiudad] = useState('');
   const [direccionEnvio, setDireccionEnvio] = useState('');
 
   if (!producto) return null;
 
-  // Cálculo de totales dinámicos
   const subtotal = (Number(producto.precio) || 0) * cantidad;
   const costoEnvio = tipoEnvio === 'domicilio' ? 10000 : 0;
   const totalConEnvio = subtotal + costoEnvio;
 
+  // Evalúa la autenticación del usuario antes de permitir la compra; si no está autenticado, almacena la intención de compra temporalmente.
   const manejarClicComprar = () => {
     if (!usuarioAutenticado) {
-      // Guardamos la intención de compra
       const compraPendiente = {
         producto,
         talla,
@@ -39,16 +39,20 @@ const ProductoModal = ({ producto, onClose, usuarioAutenticado, abrirLogin }) =>
     setMostrarPagoNequi(true);
   };
 
+  // Valida los datos del formulario y envía la información del pedido junto con el comprobante al servidor backend mediante una petición HTTP POST.
   const confirmarPedidoConNequi = async () => {
-    // Validaciones
     if (!telefonoContacto.trim()) {
       alert('Por favor ingresa un número de teléfono de contacto.');
       return;
     }
-    if (tipoEnvio === 'domicilio' && !direccionEnvio.trim()) {
-      alert('Por favor ingresa la dirección de entrega.');
-      return;
+
+    if (tipoEnvio === 'domicilio') {
+      if (!cedula.trim() || !ciudad.trim() || !direccionEnvio.trim()) {
+        alert('Para envío a domicilio debes completar Cédula, Ciudad y Dirección.');
+        return;
+      }
     }
+
     if (!comprobante) {
       alert('Por favor adjunta el comprobante de pago en Nequi.');
       return;
@@ -56,17 +60,37 @@ const ProductoModal = ({ producto, onClose, usuarioAutenticado, abrirLogin }) =>
 
     try {
       const token = localStorage.getItem('token');
+      
+      const usuarioGuardado = JSON.parse(localStorage.getItem('usuario')) || {};
+      const idUsuarioActivo = usuarioGuardado.id_usuario || usuarioGuardado.id || 5;
+
       const formData = new FormData();
-      formData.append('id_producto', producto.id_producto);
+      
+      formData.append('id_usuario', idUsuarioActivo);
+      formData.append('id_producto', producto.id_producto || producto.codigo);
+      formData.append('talla_seleccionada', talla);
       formData.append('talla', talla);
       formData.append('cantidad', cantidad);
-      formData.append('subtotal', subtotal);
-      formData.append('costo_envio', costoEnvio);
+      formData.append('precio_total', totalConEnvio);
       formData.append('total', totalConEnvio);
-      formData.append('tipo_envio', tipoEnvio);
-      formData.append('telefono', telefonoContacto.trim());
-      formData.append('direccion', tipoEnvio === 'domicilio' ? direccionEnvio.trim() : 'Recoge en tienda');
+      
+      formData.append('telefono_contacto', telefonoContacto.trim());
+      formData.append('telefono_cliente', telefonoContacto.trim());
+      
+      formData.append('tipo_entrega', tipoEnvio === 'domicilio' ? 'Envio' : 'Recoger');
+      
+      if (tipoEnvio === 'domicilio') {
+        formData.append('cedula_cliente', cedula.trim());
+        formData.append('ciudad', ciudad.trim());
+        formData.append('direccion_envio', direccionEnvio.trim());
+        formData.append('direccion_entrega', direccionEnvio.trim());
+      } else {
+        formData.append('direccion_envio', 'Recogida en tienda');
+        formData.append('direccion_entrega', 'Recogida en tienda');
+      }
+
       formData.append('comprobante', comprobante);
+      formData.append('comprobante_nequi', comprobante);
 
       const res = await fetch('http://localhost:5000/api/pedidos', {
         method: 'POST',
@@ -97,7 +121,6 @@ const ProductoModal = ({ producto, onClose, usuarioAutenticado, abrirLogin }) =>
         <button style={styles.closeBtn} onClick={onClose}>✕</button>
 
         {!mostrarPagoNequi ? (
-          /* VENTANA 1: SELECCIÓN DE PRODUCTO */
           <div style={styles.container}>
             <div style={styles.imageCol}>
               <img 
@@ -114,7 +137,6 @@ const ProductoModal = ({ producto, onClose, usuarioAutenticado, abrirLogin }) =>
                 {producto.descripcion || 'Bandana exclusiva hecha a mano con amor para tu mascota.'}
               </p>
 
-              {/* Selector de Tallas */}
               <div style={styles.fieldGroup}>
                 <label><strong>Selecciona la Talla:</strong></label>
                 <div style={styles.tallasContainer}>
@@ -134,7 +156,6 @@ const ProductoModal = ({ producto, onClose, usuarioAutenticado, abrirLogin }) =>
                 </div>
               </div>
 
-              {/* Selector de Cantidad */}
               <div style={styles.fieldGroup}>
                 <label><strong>Cantidad:</strong></label>
                 <input
@@ -156,12 +177,10 @@ const ProductoModal = ({ producto, onClose, usuarioAutenticado, abrirLogin }) =>
             </div>
           </div>
         ) : (
-          /* VENTANA 2: PAGO NEQUI + DATOS DE ENTREGA Y COMPROBANTE */
           <div style={{ textAlign: "center" }}>
             <img src="/Imagenes/logo verde nombre.png" alt="Logo" style={{ height: "30px", marginBottom: "3px" }} />
             <h2 style={{ color: "#124e3f", margin: "2px 0" }}>Pagar tu pedido</h2>
 
-            {/* Método de Entrega */}
             <div style={styles.opcionesEnvioBox}>
               <label style={{ fontWeight: 'bold', fontSize: '0.88rem', display: 'block', marginBottom: '5px' }}>
                 Método de Entrega:
@@ -190,7 +209,6 @@ const ProductoModal = ({ producto, onClose, usuarioAutenticado, abrirLogin }) =>
               </div>
             </div>
 
-            {/* Formulario Dinámico de Contacto */}
             <div style={{ textAlign: "left", margin: "8px 0" }}>
               <label style={styles.labelForm}>Teléfono de contacto / WhatsApp: *</label>
               <input
@@ -203,6 +221,24 @@ const ProductoModal = ({ producto, onClose, usuarioAutenticado, abrirLogin }) =>
 
               {tipoEnvio === 'domicilio' && (
                 <>
+                  <label style={styles.labelForm}>Cédula del destinatario: *</label>
+                  <input
+                    type="text"
+                    placeholder="Ej: 1098765432"
+                    value={cedula}
+                    onChange={(e) => setCedula(e.target.value)}
+                    style={styles.inputForm}
+                  />
+
+                  <label style={styles.labelForm}>Ciudad: *</label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Bogotá"
+                    value={ciudad}
+                    onChange={(e) => setCiudad(e.target.value)}
+                    style={styles.inputForm}
+                  />
+
                   <label style={styles.labelForm}>Dirección de Envío: *</label>
                   <input
                     type="text"
@@ -215,7 +251,6 @@ const ProductoModal = ({ producto, onClose, usuarioAutenticado, abrirLogin }) =>
               )}
             </div>
 
-            {/* Tarjeta de Datos Nequi y Valor Recalculado */}
             <div style={styles.nequiCard}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
                 <div style={styles.nequiLogoBox}>NEQUI</div>
@@ -229,7 +264,6 @@ const ProductoModal = ({ producto, onClose, usuarioAutenticado, abrirLogin }) =>
               </div>
             </div>
 
-            {/* Adjuntar Comprobante */}
             <div style={{ textAlign: "left", margin: "8px 0" }}>
               <label style={styles.labelForm}>Adjuntar comprobante (PDF o imagen): *</label>
               <input
@@ -292,7 +326,7 @@ const styles = {
   inputForm: { width: '100%', padding: '6px 8px', marginTop: '2px', borderRadius: '5px', border: '1px solid #ccc', boxSizing: 'border-box', fontSize: '0.85rem' },
   nequiCard: { background: "#fdfdfd", padding: "10px", borderRadius: "8px", margin: "8px 0", border: "1px solid #e0e0e0" },
   nequiLogoBox: { backgroundColor: "#da0080", color: "#fff", fontWeight: "bold", padding: "6px 8px", borderRadius: "6px", fontSize: "0.8rem", letterSpacing: "1px" },
-  btnConfirmar: { backgroundColor: "#d39e24", color: "#fff", border: "none", padding: "10px 20px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold", width: "100%", fontSize: "0.95rem", marginTop: "4px" },
+  btnConfirmar: { backgroundColor: "#d39e24", color: "#fff", border: "1px solid #d0e1d4", padding: "10px 20px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold", width: "100%", fontSize: "0.95rem", marginTop: "4px" },
   btnCancelar: { backgroundColor: "transparent", color: "#124e3f", border: "1px solid #124e3f", padding: "6px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold", width: "100%", fontSize: "0.85rem" }
 };
 

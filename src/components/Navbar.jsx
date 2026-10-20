@@ -1,32 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Estado para verificar si hay sesión activa en tiempo real
   const [isLogged, setIsLogged] = useState(false);
   const [userRole, setUserRole] = useState(null);
 
-  // ESTADOS PARA MODALES
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Estado para saber si el aviso actual es un éxito de registro
   const [isRegisterSuccess, setIsRegisterSuccess] = useState(false);
 
-  // Campos de formulario de Login
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
 
-  // Campos de formulario de Registro
   const [regNombre, setRegNombre] = useState("");
   const [regEmail, setRegEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
 
-  // Verificar sesión al cargar el componente
+  // Verifica la sesión activa almacenada al cargar el componente.
   useEffect(() => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("userRole");
@@ -36,7 +32,7 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
     }
   }, []);
 
-  // Efecto para abrir el modal de login si se solicita desde fuera (Catálogo/LandingPage)
+  // Controla la apertura del modal de inicio de sesión mediante solicitudes externas.
   useEffect(() => {
     if (abrirLoginExterno) {
       setShowRegister(false);
@@ -45,7 +41,7 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
     }
   }, [abrirLoginExterno]);
 
-  // Función para Iniciar Sesión conectada al Backend
+  // Procesa la autenticación del usuario comunicándose con el servidor backend.
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
 
@@ -73,7 +69,7 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
         resetForms();
 
         if (data.usuario.rol === "admin") {
-          navigate("/admin");
+          navigate("/admin/pedidos");
         } else {
           navigate("/mis-pedidos");
         }
@@ -90,7 +86,7 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
     }
   };
 
-  // Función para Registrarse conectada al Backend (Usando el modal de la plataforma)
+  // Gestiona el registro de nuevos usuarios mediante el API backend.
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
 
@@ -110,11 +106,11 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
       if (response.ok) {
         setShowRegister(false);
         resetForms();
-        setIsRegisterSuccess(true); // Marcamos que fue un éxito
+        setIsRegisterSuccess(true);
         setErrorMessage(
-          "¡Cuenta creada con éxito! 🐾 Ya puedes iniciar sesión.",
+          "¡Cuenta creada con éxito! 🐾 Ya se puede iniciar sesión.",
         );
-        setShowError(true); // Muestra tu modal bonito de la plataforma
+        setShowError(true);
       } else {
         setIsRegisterSuccess(false);
         setErrorMessage(data.message || "Error al registrar el usuario.");
@@ -153,22 +149,55 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
     setShowRegister(true);
   };
 
-  // Controlar la acción del botón del modal de aviso
   const handleModalClose = () => {
     setShowError(false);
     if (isRegisterSuccess) {
       setIsRegisterSuccess(false);
-      setShowLogin(true); // Abre el login automáticamente al cerrar el aviso de éxito
+      setShowLogin(true);
     }
   };
 
-  // RENDER DE ENLACES
+  // Realiza la navegación fluida hacia secciones específicas de la página principal.
+  const navegarASeccion = (idSeccion) => {
+    if (location.pathname !== "/") {
+      navigate("/");
+      setTimeout(() => {
+        const elemento = document.getElementById(idSeccion);
+        if (elemento) {
+          elemento.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 300);
+    } else {
+      const elemento = document.getElementById(idSeccion);
+      if (elemento) {
+        elemento.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
+
+  // Renderiza los enlaces de navegación según el rol del usuario.
   const renderEnlaces = () => {
     if (tipo === "admin" || userRole === "admin") {
       return (
         <nav className="nav">
-          <a href="/admin">Inventario</a>
-          <a href="/admin">Pedidos General</a>
+          <a
+            href="/admin"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/admin");
+            }}
+          >
+            Inventario
+          </a>
+          <a
+            href="/admin/pedidos"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/admin/pedidos");
+            }}
+          >
+            Pedidos General
+          </a>
         </nav>
       );
     }
@@ -180,11 +209,21 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
           onClick={(e) => {
             e.preventDefault();
             navigate("/");
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
         >
           Inicio
         </a>
-        <a href="#catalogo">Catálogo</a>
+
+        <a
+          href="#catalogo"
+          onClick={(e) => {
+            e.preventDefault();
+            navegarASeccion("catalogo");
+          }}
+        >
+          Catálogo
+        </a>
 
         {isLogged && (
           <a
@@ -198,13 +237,30 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
           </a>
         )}
 
-        <a href="#nosotros">Nosotros</a>
-        <a href="#contacto">Contacto</a>
+        <a
+          href="#nosotros"
+          onClick={(e) => {
+            e.preventDefault();
+            navegarASeccion("nosotros");
+          }}
+        >
+          Nosotros
+        </a>
+
+        <a
+          href="#contacto"
+          onClick={(e) => {
+            e.preventDefault();
+            navegarASeccion("contacto");
+          }}
+        >
+          Contacto
+        </a>
       </nav>
     );
   };
 
-  // RENDER DE BOTONES
+  // Renderiza los botones de autenticación o el estado de sesión activa.
   const renderBotones = () => {
     if (isLogged) {
       return (
@@ -237,6 +293,7 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
           onClick={(e) => {
             e.preventDefault();
             navigate("/");
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
         >
           <img
@@ -251,7 +308,6 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
         {renderBotones()}
       </div>
 
-      {/* MODAL DE INICIAR SESIÓN */}
       {showLogin && (
         <div className="login-modal" style={{ display: "flex" }}>
           <div className="login-box">
@@ -299,7 +355,6 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
         </div>
       )}
 
-      {/* MODAL DE REGISTRO */}
       {showRegister && (
         <div className="login-modal" style={{ display: "flex" }}>
           <div className="login-box">
@@ -358,7 +413,6 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
         </div>
       )}
 
-      {/* MODAL DE AVISO / ERROR DEL SISTEMA */}
       {showError && (
         <div className="modal-error" style={{ display: "flex" }}>
           <div className="modal-error-content">
