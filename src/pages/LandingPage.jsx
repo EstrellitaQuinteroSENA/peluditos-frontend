@@ -13,6 +13,8 @@ function LandingPage() {
   const usuarioAutenticado = Boolean(localStorage.getItem("token"));
 
   // Formatea la URL de las imágenes obtenidas desde el servidor backend.
+  const BASE_URL = API_URL.replace("/api", "");
+
   const formatearUrlImagen = (url) => {
     if (!url) return "/Imagenes/Perro.png";
     if (
@@ -23,7 +25,7 @@ function LandingPage() {
     ) {
       return url;
     }
-    return `http://localhost:5000${url.startsWith("/") ? "" : "/"}${url}`;
+    return `${BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
   };
 
   // Consume la API REST del backend al cargar el componente para poblar el catálogo de productos.

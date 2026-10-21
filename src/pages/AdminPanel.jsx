@@ -49,8 +49,10 @@ function AdminPanel() {
   }, []);
 
   // Formatea la dirección URL de las imágenes gestionadas por el servidor backend.
+  const BASE_URL = API_URL.replace("/api", "");
+
   const formatearUrlImagen = (url) => {
-    if (!url) return null;
+    if (!url) return "/Imagenes/Perro.png";
     if (
       url.startsWith("http://") ||
       url.startsWith("https://") ||
@@ -59,7 +61,7 @@ function AdminPanel() {
     ) {
       return url;
     }
-    return `http://localhost:5000${url.startsWith("/") ? "" : "/"}${url}`;
+    return `${BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
   };
 
   // Obtiene el catálogo actualizado de productos desde la base de datos MySQL.

@@ -9,6 +9,8 @@ function MisPedidos() {
   const [comprobante, setComprobante] = useState(null);
 
   // Formatea la URL de las imágenes obtenidas desde el servidor backend.
+  const BASE_URL = API_URL.replace("/api", "");
+
   const formatearUrlImagen = (url) => {
     if (!url) return "/Imagenes/Perro.png";
     if (
@@ -19,7 +21,7 @@ function MisPedidos() {
     ) {
       return url;
     }
-    return `http://localhost:5000${url.startsWith("/") ? "" : "/"}${url}`;
+    return `${BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
   };
 
   // Carga los pedidos del usuario autenticado e inspecciona si existe alguna intención de compra pendiente en el almacenamiento local.

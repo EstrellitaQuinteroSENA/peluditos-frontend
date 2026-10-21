@@ -8,6 +8,8 @@ function AdminPedidos() {
   const [comprobanteModal, setComprobanteModal] = useState(null);
 
   // Formatea la ruta de las imágenes y comprobantes gestionados por el servidor backend.
+  const BASE_URL = API_URL.replace("/api", "");
+
   const formatearUrlImagen = (url) => {
     if (!url) return "/Imagenes/Perro.png";
     if (
@@ -18,7 +20,7 @@ function AdminPedidos() {
     ) {
       return url;
     }
-    return `http://localhost:5000${url.startsWith("/") ? "" : "/"}${url}`;
+    return `${BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
   };
 
   useEffect(() => {
