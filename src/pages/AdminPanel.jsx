@@ -4,16 +4,8 @@ import { API_URL } from "../config/api";
 
 function AdminPanel() {
   const [bandanas, setBandanas] = useState([]);
-  const [listaEstilos, setListaEstilos] = useState([
-    "Galáctico",
-    "Urbano",
-    "Clásico",
-  ]);
-  const [listaMateriales, setListaMateriales] = useState([
-    "Algodón",
-    "Lino",
-    "Poliéster",
-  ]);
+  const [listaEstilos, setListaEstilos] = useState([]);
+  const [listaMateriales, setListaMateriales] = useState([]);
 
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstilo, setFiltroEstilo] = useState("Todos");
@@ -46,7 +38,28 @@ function AdminPanel() {
 
   useEffect(() => {
     cargarProductos();
+    cargarCatalogos();
   }, []);
+
+  // Carga los estilos y materiales dinámicamente desde la base de datos
+  const cargarCatalogos = async () => {
+    try {
+      const resEstilos = await fetch(`${API_URL}/estilos`);
+      if (resEstilos.ok) {
+        const dataEstilos = await resEstilos.json();
+        // Extraemos los nombres de los estilos de la BD (ej: Clásico, Galáctico, Urbano, Floral, Navidad)
+        setListaEstilos(dataEstilos.map((e) => e.nombre_estilo || e));
+      }
+
+      const resMateriales = await fetch(`${API_URL}/materiales`);
+      if (resMateriales.ok) {
+        const dataMateriales = await resMateriales.json();
+        setListaMateriales(dataMateriales.map((m) => m.nombre_material || m));
+      }
+    } catch (error) {
+      console.error("Error al cargar estilos y materiales:", error);
+    }
+  };
 
   // Formatea la dirección URL de las imágenes gestionadas por el servidor backend.
   const BASE_URL = API_URL.replace("/api", "");
@@ -102,10 +115,10 @@ function AdminPanel() {
   const handleEdit = (item) => {
     setEditingId(item.id);
 
-    if (!listaEstilos.includes(item.estilo)) {
+    if (item.estilo && !listaEstilos.includes(item.estilo)) {
       setListaEstilos((prev) => [...prev, item.estilo]);
     }
-    if (!listaMateriales.includes(item.material)) {
+    if (item.material && !listaMateriales.includes(item.material)) {
       setListaMateriales((prev) => [...prev, item.material]);
     }
 
