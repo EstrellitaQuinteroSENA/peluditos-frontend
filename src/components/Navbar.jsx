@@ -18,10 +18,12 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false); // Estado ojito Login
 
   const [regNombre, setRegNombre] = useState("");
   const [regEmail, setRegEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
+  const [showRegPassword, setShowRegPassword] = useState(false); // Estado ojito Registro
 
   // Verifica la sesión activa almacenada al cargar el componente.
   useEffect(() => {
@@ -135,9 +137,11 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
   const resetForms = () => {
     setLoginEmail("");
     setLoginPassword("");
+    setShowLoginPassword(false);
     setRegNombre("");
     setRegEmail("");
     setRegPassword("");
+    setShowRegPassword(false);
   };
 
   const openLoginModal = () => {
@@ -336,14 +340,38 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
                 required
               />
               <label>Contraseña</label>
-              <input
-                type="password"
-                placeholder="********"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                required
-              />
-              <button type="submit" className="btn-primary">
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showLoginPassword ? "text" : "password"}
+                  placeholder="********"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  required
+                  style={{ width: "100%", paddingRight: "40px" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "10px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "16px",
+                  }}
+                >
+                  {showLoginPassword ? "🙈" : "👁️"}
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                className="btn-primary"
+                style={{ marginTop: "15px" }}
+              >
                 Iniciar sesión
               </button>
             </form>
@@ -394,14 +422,38 @@ function Navbar({ tipo, abrirLoginExterno, onLoginAbierto }) {
                 required
               />
               <label>Contraseña</label>
-              <input
-                type="password"
-                placeholder="********"
-                value={regPassword}
-                onChange={(e) => setRegPassword(e.target.value)}
-                required
-              />
-              <button type="submit" className="btn-primary">
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showRegPassword ? "text" : "password"}
+                  placeholder="********"
+                  value={regPassword}
+                  onChange={(e) => setRegPassword(e.target.value)}
+                  required
+                  style={{ width: "100%", paddingRight: "40px" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowRegPassword(!showRegPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "10px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "16px",
+                  }}
+                >
+                  {showRegPassword ? "🙈" : "👁️"}
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                className="btn-primary"
+                style={{ marginTop: "15px" }}
+              >
                 Crear cuenta
               </button>
             </form>
