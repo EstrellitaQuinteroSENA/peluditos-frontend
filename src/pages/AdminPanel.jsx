@@ -285,6 +285,15 @@ function AdminPanel() {
         body: dataForm,
       });
 
+      // Leemos la respuesta como texto primero para evitar que explote si el backend devuelve HTML de error 500
+      const contentType = response.headers.get("content-type");
+      let responseData;
+      if (contentType && contentType.includes("application/json")) {
+        responseData = await response.json();
+      } else {
+        responseData = { message: await response.text() };
+      }
+
       if (response.ok) {
         alert(
           editingId
@@ -294,13 +303,13 @@ function AdminPanel() {
         cargarProductos();
         closeBandanaModal();
       } else {
-        const errorData = await response.json();
         alert(
-          "Error al guardar: " + (errorData.message || "No se pudo guardar"),
+          "Error al guardar: " + (responseData.message || "No se pudo guardar"),
         );
       }
     } catch (error) {
       console.error("Error al guardar producto:", error);
+      alert("Error de conexión con el servidor backend.");
     }
   };
 
