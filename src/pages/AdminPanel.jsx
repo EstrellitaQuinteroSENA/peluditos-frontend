@@ -44,17 +44,20 @@ function AdminPanel() {
   // Carga los estilos y materiales dinámicamente desde la base de datos
   const cargarCatalogos = async () => {
     try {
-      const resEstilos = await fetch(`${API_URL}/estilos`);
+      const resEstilos = await fetch(`${API_URL}/productos/estilos`);
       if (resEstilos.ok) {
         const dataEstilos = await resEstilos.json();
-        // Extraemos los nombres de los estilos de la BD (ej: Clásico, Galáctico, Urbano, Floral, Navidad)
-        setListaEstilos(dataEstilos.map((e) => e.nombre_estilo || e));
+        setListaEstilos(
+          dataEstilos.map((e) => e.nombre_estilo || e.nombre || e),
+        );
       }
 
-      const resMateriales = await fetch(`${API_URL}/materiales`);
+      const resMateriales = await fetch(`${API_URL}/productos/materiales`);
       if (resMateriales.ok) {
         const dataMateriales = await resMateriales.json();
-        setListaMateriales(dataMateriales.map((m) => m.nombre_material || m));
+        setListaMateriales(
+          dataMateriales.map((m) => m.nombre_material || m.nombre || m),
+        );
       }
     } catch (error) {
       console.error("Error al cargar estilos y materiales:", error);
