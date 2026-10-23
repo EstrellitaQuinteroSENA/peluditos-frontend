@@ -59,6 +59,14 @@ function MisPedidos() {
       if (res.ok) {
         const data = await res.json();
         setPedidos(data);
+      } else if (res.status === 401) {
+        // Token inválido o expirado detectado por el backend
+        alert(
+          "Tu sesión ha expirado o el token es inválido. Por favor inicia sesión nuevamente.",
+        );
+        localStorage.removeItem("token");
+        // Opcional: Redirigir al login si manejas rutas con window.location o useNavigate
+        window.location.href = "/login";
       } else {
         console.error("Error al obtener los pedidos. Status:", res.status);
       }
@@ -78,6 +86,11 @@ function MisPedidos() {
 
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        alert("No hay sesión activa. Por favor inicia sesión.");
+        return;
+      }
+
       const formData = new FormData();
       formData.append(
         "id_producto",
@@ -103,6 +116,10 @@ function MisPedidos() {
         setCompraPendiente(null);
         setComprobante(null);
         fetchMisPedidos();
+      } else if (res.status === 401) {
+        alert("Sesión expirada. Por favor vuelve a iniciar sesión.");
+        localStorage.removeItem("token");
+        window.location.href = "/login";
       } else {
         const err = await res.json();
         alert(err.message || "Error al guardar el pedido.");
