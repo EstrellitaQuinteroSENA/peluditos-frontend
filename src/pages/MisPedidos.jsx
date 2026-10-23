@@ -30,7 +30,11 @@ function MisPedidos() {
 
     const datosGuardados = localStorage.getItem("compraPendiente");
     if (datosGuardados) {
-      setCompraPendiente(JSON.parse(datosGuardados));
+      try {
+        setCompraPendiente(JSON.parse(datosGuardados));
+      } catch (err) {
+        console.error("Error leyendo compra pendiente:", err);
+      }
       localStorage.removeItem("compraPendiente");
     }
   }, []);
@@ -39,14 +43,24 @@ function MisPedidos() {
   const fetchMisPedidos = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) return;
+      if (!token) {
+        setCargando(false);
+        return;
+      }
 
       const res = await fetch(`${API_URL}/pedidos/mis-pedidos`, {
-        headers: { Authorization: `Bearer ${token}` },
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
+
       if (res.ok) {
         const data = await res.json();
         setPedidos(data);
+      } else {
+        console.error("Error al obtener los pedidos. Status:", res.status);
       }
     } catch (error) {
       console.error("Error al obtener los pedidos:", error);
@@ -76,7 +90,9 @@ function MisPedidos() {
 
       const res = await fetch(`${API_URL}/pedidos`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
 
@@ -85,6 +101,7 @@ function MisPedidos() {
           "¡Pedido registrado exitosamente! Ha quedado en la tabla con estado Pendiente.",
         );
         setCompraPendiente(null);
+        setComprobante(null);
         fetchMisPedidos();
       } else {
         const err = await res.json();
@@ -147,69 +164,73 @@ function MisPedidos() {
                 </tr>
               </thead>
               <tbody>
-                {pedidos.map((p, index) => (
-                  <tr key={p.id_pedido || index} style={styles.filaTabla}>
-                    <td style={styles.td}>P-00{p.id_pedido}</td>
-                    <td style={styles.td}>
-                      <img
-                        src={formatearUrlImagen(p.imagen)}
-                        alt={p.nombre_producto || "Accesorio"}
+                {pedidos.map((p, index) => {
+                  const imagenMostrar =
+                    p.imagen_url || p.imagen || p.imagen_producto;
+                  const nombreMostrar =
+                    p.nombre_producto || p.nombre || p.producto || "Bandana";
+                  const estadoMostrar =
+                    p.estado_pedido || p.estado || "Pendiente de verificación";
+                  const totalMostrar =
+                    p.total || p.precio_total || p.precio || 0;
+
+                  return (
+                    <tr key={p.id_pedido || index} style={styles.filaTabla}>
+                      <td style={styles.td}>P-00{p.id_pedido}</td>
+                      <td style={styles.td}>
+                        <img
+                          src={formatearUrlImagen(imagenMostrar)}
+                          alt={nombreMostrar}
+                          style={{
+                            width: "45px",
+                            height: "45px",
+                            objectFit: "cover",
+                            borderRadius: "6px",
+                            border: "1px solid #ddd",
+                          }}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "/Imagenes/Perro.png";
+                          }}
+                        />
+                      </td>
+                      <td style={styles.td}>{nombreMostrar}</td>
+                      <td style={styles.td}>
+                        <strong>{p.talla || "M"}</strong>
+                      </td>
+                      <td style={styles.td}>{p.cantidad || 1}</td>
+                      <td
                         style={{
-                          width: "45px",
-                          height: "45px",
-                          objectFit: "cover",
-                          borderRadius: "6px",
-                          border: "1px solid #ddd",
-                        }}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "/Imagenes/Perro.png";
-                        }}
-                      />
-                    </td>
-                    <td style={styles.td}>
-                      {p.nombre_producto || p.producto || "Bandana"}
-                    </td>
-                    <td style={styles.td}>
-                      <strong>{p.talla || "M"}</strong>
-                    </td>
-                    <td style={styles.td}>{p.cantidad || 1}</td>
-                    <td
-                      style={{
-                        ...styles.td,
-                        color: "#124e3f",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      $
-                      {Number(p.total || p.precio_total || 0).toLocaleString(
-                        "es-CO",
-                      )}
-                    </td>
-                    <td style={styles.td}>
-                      <span
-                        style={{
-                          padding: "4px 10px",
-                          borderRadius: "12px",
-                          fontSize: "0.85rem",
+                          ...styles.td,
+                          color: "#124e3f",
                           fontWeight: "bold",
-                          backgroundColor:
-                            (p.estado_pedido || p.estado) === "Verificado"
-                              ? "#d4edda"
-                              : "#fff3cd",
-                          color:
-                            (p.estado_pedido || p.estado) === "Verificado"
-                              ? "#155724"
-                              : "#856404",
                         }}
                       >
-                        {p.estado_pedido ||
-                          p.estado ||
-                          "Pendiente de verificación"}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                        ${Number(totalMostrar).toLocaleString("es-CO")}
+                      </td>
+                      <td style={styles.td}>
+                        <span
+                          style={{
+                            padding: "4px 10px",
+                            borderRadius: "12px",
+                            fontSize: "0.85rem",
+                            fontWeight: "bold",
+                            backgroundColor:
+                              estadoMostrar === "Verificado"
+                                ? "#d4edda"
+                                : "#fff3cd",
+                            color:
+                              estadoMostrar === "Verificado"
+                                ? "#155724"
+                                : "#856404",
+                          }}
+                        >
+                          {estadoMostrar}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -246,7 +267,7 @@ function MisPedidos() {
                 >
                   Producto:{" "}
                   <span style={{ color: "#333", fontWeight: "normal" }}>
-                    {compraPendiente.producto.nombre}
+                    {compraPendiente.producto?.nombre}
                   </span>
                 </p>
                 <p
