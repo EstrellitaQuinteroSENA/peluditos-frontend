@@ -30,10 +30,28 @@ function AdminPedidos() {
   // Obtiene el listado general de pedidos registrados desde la base de datos a través de la API REST.
   const cargarPedidos = async () => {
     try {
-      const response = await fetch(`${API_URL}/pedidos`);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setCargando(false);
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/pedidos`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // <-- Token de autorización enviado
+        },
+      });
+
       if (response.ok) {
         const data = await response.json();
         setPedidos(data);
+      } else if (response.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/";
+      } else {
+        console.error("Error al obtener pedidos generales. Status:", response.status);
       }
     } catch (error) {
       console.error("Error al cargar pedidos generales:", error);
@@ -45,9 +63,19 @@ function AdminPedidos() {
   // Actualiza el estado logístico de un pedido específico mediante una petición HTTP PUT al servidor.
   const handleCambiarEstado = async (id_pedido, nuevoEstado) => {
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("No hay sesión activa de administrador.");
+        window.location.href = "/";
+        return;
+      }
+
       const response = await fetch(`${API_URL}/pedidos/${id_pedido}/estado`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // <-- Token de autorización enviado
+        },
         body: JSON.stringify({ estado_pedido: nuevoEstado }),
       });
 
@@ -56,6 +84,10 @@ function AdminPedidos() {
           `Estado del pedido P-00${id_pedido} actualizado a: ${nuevoEstado}`,
         );
         cargarPedidos();
+      } else if (response.status === 401) {
+        alert("Sesión expirada. Por favor vuelve a ingresar.");
+        localStorage.removeItem("token");
+        window.location.href = "/";
       } else {
         alert("No se pudo actualizar el estado.");
       }

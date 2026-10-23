@@ -8,7 +8,6 @@ function MisPedidos() {
   const [compraPendiente, setCompraPendiente] = useState(null);
   const [comprobante, setComprobante] = useState(null);
 
-  // Formatea la URL de las imágenes obtenidas desde el servidor backend.
   const BASE_URL = API_URL.replace("/api", "");
 
   const formatearUrlImagen = (url) => {
@@ -24,7 +23,6 @@ function MisPedidos() {
     return `${BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
   };
 
-  // Carga los pedidos del usuario autenticado e inspecciona si existe alguna intención de compra pendiente en el almacenamiento local.
   useEffect(() => {
     fetchMisPedidos();
 
@@ -39,7 +37,6 @@ function MisPedidos() {
     }
   }, []);
 
-  // Realiza una petición HTTP GET para obtener el listado de pedidos asociados al usuario actual.
   const fetchMisPedidos = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -60,7 +57,6 @@ function MisPedidos() {
         const data = await res.json();
         setPedidos(data);
       } else if (res.status === 401) {
-        // Token inválido o expirado detectado por el backend
         localStorage.removeItem("token");
         window.location.href = "/";
       } else {
@@ -73,7 +69,6 @@ function MisPedidos() {
     }
   };
 
-  // Valida el comprobante de pago y envía la orden pendiente hacia el backend mediante un objeto FormData.
   const confirmarYGuardarPedido = async () => {
     if (!comprobante) {
       alert("Por favor adjunta el comprobante para continuar.");
