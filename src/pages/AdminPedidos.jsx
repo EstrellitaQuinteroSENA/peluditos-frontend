@@ -40,7 +40,7 @@ function AdminPedidos() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // <-- Token de autorización enviado
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -51,7 +51,10 @@ function AdminPedidos() {
         localStorage.removeItem("token");
         window.location.href = "/";
       } else {
-        console.error("Error al obtener pedidos generales. Status:", response.status);
+        console.error(
+          "Error al obtener pedidos generales. Status:",
+          response.status,
+        );
       }
     } catch (error) {
       console.error("Error al cargar pedidos generales:", error);
@@ -74,14 +77,17 @@ function AdminPedidos() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // <-- Token de autorización enviado
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ estado_pedido: nuevoEstado }),
+        body: JSON.stringify({
+          estado: nuevoEstado,
+          estado_pedido: nuevoEstado,
+        }),
       });
 
       if (response.ok) {
         alert(
-          `Estado del pedido P-00${id_pedido} actualizado a: ${nuevoEstado}`,
+          `¡Estado del pedido P-00${id_pedido} actualizado exitosamente a: ${nuevoEstado}!`,
         );
         cargarPedidos();
       } else if (response.status === 401) {
@@ -89,10 +95,17 @@ function AdminPedidos() {
         localStorage.removeItem("token");
         window.location.href = "/";
       } else {
-        alert("No se pudo actualizar el estado.");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Error del servidor:", errorData);
+        alert(
+          errorData.message ||
+            errorData.error ||
+            "No se pudo actualizar el estado.",
+        );
       }
     } catch (error) {
       console.error("Error al cambiar estado:", error);
+      alert("Error de conexión al intentar actualizar el estado.");
     }
   };
 
